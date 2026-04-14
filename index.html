@@ -1,32 +1,99 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clothing Billing</title>
     <style>
-        table {
-            border-collapse: collapse;
-            width: 70%;
-            margin: 20px auto;
-        }
-        th, td {
-            border: 1px solid black;
-            padding: 10px;
-            text-align: center;
-        }
-        input {
-            padding: 5px;
-            margin: 5px;
+        body {
+            font-family: Arial, sans-serif;
+            margin: 10px;
+            background-color: #f4f4f9;
         }
         h2 {
             text-align: center;
+            color: #333;
         }
         .top-section {
-            text-align: center;
-            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+            margin: 0 auto 20px auto;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        .controls {
+        .top-section input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px; /* Mobile par zoom prevent karne ke liye */
+        }
+        
+        /* Table Container for Horizontal Scroll */
+        .table-container {
+            overflow-x: auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 600px; /* Table ko sikurne se rokne ke liye */
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px 8px;
             text-align: center;
-            margin: 10px;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        input[type="number"], input[type="text"] {
+            width: 90%;
+            padding: 8px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+
+        /* Controls / Buttons */
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+        button {
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            transition: 0.3s;
+        }
+        button:nth-child(1) { background-color: #28a745; } /* Print */
+        button:nth-child(2) { background-color: #ffc107; color: black; } /* Redeem */
+        button:nth-child(3) { background-color: #dc3545; grid-column: span 2; } /* Reset */
+
+        button:active {
+            opacity: 0.8;
+        }
+
+        /* Print Styling */
+        @media print {
+            .controls, .top-section input::placeholder {
+                display: none;
+            }
+            body { background: white; }
+            .table-container { box-shadow: none; overflow: visible; }
+            table { min-width: 100%; }
         }
     </style>
 </head>
@@ -35,92 +102,92 @@
 <h2>Clothing Billing System</h2>
 
 <div class="top-section">
-    Customer Name: <input type="text" id="name" placeholder="Enter Name">
-    Mobile No: <input type="text" id="mobile" placeholder="Enter Mobile" oninput="getPointsFromSheet()">
+    <label>Customer Name:</label>
+    <input type="text" id="name" placeholder="Enter Name">
+    <label>Mobile No:</label>
+    <input type="text" id="mobile" placeholder="Enter Mobile" oninput="getPointsFromSheet()">
 </div>
 
-<table id="billTable">
-    <tr>
-        <th>Item</th>
-        <th>Brand</th>
-        <th>Quantity</th>
-        <th>Price</th>
-        <th>Total</th>
-    </tr>
-
-    <tr>
-        <td>Shirts / T-shirts</td>
-        <td><input type="text"></td>
-        <td><input type="number" oninput="calculate()"></td>
-        <td><input type="number" oninput="calculate()"></td>
-        <td>0</td>
-    </tr>
-
-    <tr>
-        <td>Trousers / Jeans</td>
-        <td><input type="text"></td>
-        <td><input type="number" oninput="calculate()"></td>
-        <td><input type="number" oninput="calculate()"></td>
-        <td>0</td>
-    </tr>
-
-    <tr>
-        <td>Jackets/Blazers</td>
-        <td><input type="text"></td>
-        <td><input type="number" oninput="calculate()"></td>
-        <td><input type="number" oninput="calculate()"></td>
-        <td>0</td>
-    </tr>
-
-    <tr>
-        <td>Undergarments/Socks</td>
-        <td><input type="text"></td>
-        <td><input type="number" oninput="calculate()"></td>
-        <td><input type="number" oninput="calculate()"></td>
-        <td>0</td>
-    </tr>
-
-    <tr>
-        <td>Shoes/Slipper</td>
-        <td><input type="text"></td>
-        <td><input type="number" oninput="calculate()"></td>
-        <td><input type="number" oninput="calculate()"></td>
-        <td>0</td>
-    </tr>
-
-    <tr>
-        <td>Accessories</td>
-        <td><input type="text"></td>
-        <td><input type="number" oninput="calculate()"></td>
-        <td><input type="number" oninput="calculate()"></td>
-        <td>0</td>
-    </tr>
-
-    <tr>
-        <th colspan="4">Grand Total</th>
-        <th id="grandTotal">0</th>
-    </tr>
-
-    <tr>
-        <th colspan="4">Discount</th>
-        <th id="discount">0</th>
-    </tr>
-
-    <tr>
-        <th colspan="4">Final Amount</th>
-        <th id="finalTotal">0</th>
-    </tr>
-
-    <tr>
-        <th colspan="4">Reward Points</th>
-        <th id="points">0</th>
-    </tr>
-</table>
+<div class="table-container">
+    <table id="billTable">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Brand</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Shirts/T-shirts</td>
+                <td><input type="text"></td>
+                <td><input type="number" oninput="calculate()"></td>
+                <td><input type="number" oninput="calculate()"></td>
+                <td class="row-total">0</td>
+            </tr>
+            <tr>
+                <td>Trousers/Jeans</td>
+                <td><input type="text"></td>
+                <td><input type="number" oninput="calculate()"></td>
+                <td><input type="number" oninput="calculate()"></td>
+                <td class="row-total">0</td>
+            </tr>
+            <tr>
+                <td>Jackets/Blazers</td>
+                <td><input type="text"></td>
+                <td><input type="number" oninput="calculate()"></td>
+                <td><input type="number" oninput="calculate()"></td>
+                <td class="row-total">0</td>
+            </tr>
+            <tr>
+                <td>Undergarments</td>
+                <td><input type="text"></td>
+                <td><input type="number" oninput="calculate()"></td>
+                <td><input type="number" oninput="calculate()"></td>
+                <td class="row-total">0</td>
+            </tr>
+            <tr>
+                <td>Shoes/Slipper</td>
+                <td><input type="text"></td>
+                <td><input type="number" oninput="calculate()"></td>
+                <td><input type="number" oninput="calculate()"></td>
+                <td class="row-total">0</td>
+            </tr>
+            <tr>
+                <td>Accessories</td>
+                <td><input type="text"></td>
+                <td><input type="number" oninput="calculate()"></td>
+                <td><input type="number" oninput="calculate()"></td>
+                <td class="row-total">0</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="4">Grand Total</th>
+                <th id="grandTotal">0</th>
+            </tr>
+            <tr>
+                <th colspan="4">Discount</th>
+                <th id="discount">0</th>
+            </tr>
+            <tr>
+                <th colspan="4">Final Amount</th>
+                <th id="finalTotal">0</th>
+            </tr>
+            <tr>
+                <th colspan="4">Reward Points</th>
+                <th id="points">0</th>
+            </tr>
+        </tfoot>
+    </table>
+</div>
 
 <div class="controls">
     <button onclick="printBill()">Print Bill</button>
     <button onclick="redeemPoints()">Redeem Points</button>
-    <button onclick="resetBill()">Reset</button>
+    <button onclick="resetBill()">Reset All</button>
 </div>
 
 <script>
@@ -130,85 +197,95 @@ let basePoints = 0;
 let currentPoints = 0;
 
 function calculate() {
-    let rows = document.getElementById("billTable").rows;
+    let table = document.getElementById("billTable");
+    let rows = table.getElementsByTagName("tbody")[0].rows;
     let grandTotal = 0;
 
-    for (let i = 1; i < rows.length; i++) {
-        if (rows[i].cells.length < 5) continue;
-
-        let qtyInput = rows[i].cells[2].querySelector("input");
-        let priceInput = rows[i].cells[3].querySelector("input");
-
-        if (!qtyInput || !priceInput) continue;
-
-        let qty = parseFloat(qtyInput.value) || 0;
-        let price = parseFloat(priceInput.value) || 0;
-
+    for (let i = 0; i < rows.length; i++) {
+        let qty = parseFloat(rows[i].cells[2].querySelector("input").value) || 0;
+        let price = parseFloat(rows[i].cells[3].querySelector("input").value) || 0;
         let total = qty * price;
         rows[i].cells[4].innerText = total;
-
         grandTotal += total;
     }
 
     document.getElementById("grandTotal").innerText = grandTotal;
-
     currentPoints = Math.floor(grandTotal / 100) * 10;
-
     document.getElementById("points").innerText = basePoints;
-
     updateFinal();
 }
 
 function updateFinal() {
     let total = parseFloat(document.getElementById("grandTotal").innerText) || 0;
     let discount = parseFloat(document.getElementById("discount").innerText) || 0;
-
     document.getElementById("finalTotal").innerText = total - discount;
 }
 
 function redeemPoints() {
     let redeemable = basePoints;
-
     if (redeemable < 10) {
         alert("No usable points");
         return;
     }
-
-    let use = prompt("Kitne points use karna chahte ho?");
+    let use = prompt("Kitne points use karna chahte ho?", redeemable);
     use = parseFloat(use);
-
     if (!use || use <= 0 || use > redeemable) {
         alert("Invalid points");
         return;
     }
-
     let discount = Math.floor(use / 10) * 10;
-
     basePoints = redeemable - discount;
-
     document.getElementById("discount").innerText = discount;
     document.getElementById("points").innerText = basePoints;
-
     updateFinal();
 }
 
 function printBill() {
     let finalPoints = basePoints + currentPoints;
-
     let name = document.getElementById("name").value;
     let mobile = document.getElementById("mobile").value.trim();
     let total = document.getElementById("finalTotal").innerText;
 
+    // 1. Data Google Sheet pe bhejne ke liye
     fetch(API_URL, {
         method: "POST",
+        mode: 'no-cors',
         body: JSON.stringify({ name, mobile, total, points: finalPoints })
     });
 
+    // 2. WhatsApp Message taiyar karna
+    if (mobile.length >= 10) {
+        let message = `*LUMARO FEEL PREMIUM* 💎%0a` +
+                      `__________________________%0a%0a` +
+                      `Dear *${name}*,%0a%0a` +
+                      `Thank you for choosing Lumaro for your wardrobe needs! It was a pleasure serving you today. ✨%0a%0a` +
+                      `*LOYALTY SUMMARY:*%0a` +
+                      `🔸 Points Earned Today: *${currentPoints}*%0a` +
+                      `🔸 Total Reward Balance: *${finalPoints}*%0a%0a` +
+                      `_You can redeem these points on your next visit to enjoy exclusive discounts on our premium collection._ 🛍️%0a%0a` +
+                      `📍Shop Location : Near Tempo Adda, Kumhawar Chauraha, Etawah%0a%0a` +
+                      `*FOLLOW US ON INSTAGRAM:*%0a` +
+                      `📸 https://www.instagram.com/lumarofeelpremium%0a%0a` +
+                      `Stay Stylish!%0a` +
+                      `*Team LUMARO*%0a` +
+                      `__________________________`;
+
+        // WhatsApp Link (91 prefix India ke liye)
+        let whatsappUrl = `https://wa.me/91${mobile}?text=${message}`;
+        
+        // Naye tab mein WhatsApp khole
+        window.open(whatsappUrl, '_blank');
+    } else {
+        alert("Kripya sahi mobile number darj karein!");
+    }
+
+    // 3. Bill Print karein
     window.print();
 }
 
 function getPointsFromSheet() {
     let mobile = document.getElementById("mobile").value.trim();
+    if(mobile.length < 10) return;
 
     fetch(API_URL + "?mobile=" + mobile)
     .then(res => res.text())
@@ -219,35 +296,33 @@ function getPointsFromSheet() {
 }
 
 function resetBill() {
+    // 1. Inputs clear karein (Name aur Mobile)
     document.getElementById("name").value = "";
     document.getElementById("mobile").value = "";
 
-    let rows = document.getElementById("billTable").rows;
+    // 2. Table ke andar ke saare inputs aur row totals clear karein
+    let table = document.getElementById("billTable");
+    let rows = table.getElementsByTagName("tbody")[0].rows;
 
-    for (let i = 1; i < rows.length; i++) {
-        if (rows[i].cells.length < 5) continue;
-
+    for (let i = 0; i < rows.length; i++) {
         let inputs = rows[i].querySelectorAll("input");
-        inputs.forEach(input => input.value = "");
-
-        rows[i].cells[4].innerText = "0";
+        inputs.forEach(input => input.value = ""); // Saare boxes khali karein
+        rows[i].cells[4].innerText = "0"; // Row ka total 0 karein
     }
 
+    // 3. Bottom totals ko reset karein
     document.getElementById("grandTotal").innerText = "0";
     document.getElementById("discount").innerText = "0";
     document.getElementById("finalTotal").innerText = "0";
     document.getElementById("points").innerText = "0";
 
+    // 4. Variables ko zero karein taaki purana hisab na rahe
     basePoints = 0;
     currentPoints = 0;
+
+    alert("Bill reset ho gaya hai!");
 }
 </script>
-
-<style>
-@media print {
-    button { display: none; }
-}
-</style>
 
 </body>
 </html>
