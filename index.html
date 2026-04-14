@@ -242,8 +242,8 @@ function redeemPoints() {
 
 function printBill() {
     let finalPoints = basePoints + currentPoints;
-    let name = document.getElementById("name").value;
-    let mobile = document.getElementById("mobile").value.trim();
+    let name = document.getElementById("name").value.trim() || "Valued Customer";
+    let mobile = document.getElementById("mobile").value.trim(); // Yahan se customer ka number uthaya ja raha hai
     let total = document.getElementById("finalTotal").innerText;
 
     // 1. Data Google Sheet pe bhejne ke liye
@@ -255,28 +255,34 @@ function printBill() {
 
     // 2. WhatsApp Message taiyar karna
     if (mobile.length >= 10) {
+        // Sirf last 10 digits lein (agar kisi ne 0 ya +91 lagaya ho toh error na aaye)
+        let cleanMobile = mobile.replace(/\D/g, '').slice(-10);
+        
         let message = `*LUMARO FEEL PREMIUM* 💎%0a` +
+                      `_Quality that defines you_%0a` +
                       `__________________________%0a%0a` +
                       `Dear *${name}*,%0a%0a` +
-                      `Thank you for choosing Lumaro for your wardrobe needs! It was a pleasure serving you today. ✨%0a%0a` +
+                      `Thank you for shopping with us! Your style journey is our priority. ✨%0a%0a` +
                       `*LOYALTY SUMMARY:*%0a` +
-                      `🔸 Points Earned Today: *${currentPoints}*%0a` +
-                      `🔸 Total Reward Balance: *${finalPoints}*%0a%0a` +
-                      `_You can redeem these points on your next visit to enjoy exclusive discounts on our premium collection._ 🛍️%0a%0a` +
-                      `📍Shop Location : Near Tempo Adda, Kumhawar Chauraha, Etawah%0a%0a` +
+                      `🔸 Points Earned: *${currentPoints}*%0a` +
+                      `🔸 Total Balance: *${finalPoints}*%0a%0a` +
+                      `_Redeem these points on your next visit for exclusive discounts._ 🛍️%0a%0a` +
+                      `*VISIT US AGAIN:*%0a` +
+                      `📍 Shop Location : Near Tempo Adda, Kumawar Chauraha, Etawah%0a%0a` +
                       `*FOLLOW US ON INSTAGRAM:*%0a` +
                       `📸 https://www.instagram.com/lumarofeelpremium%0a%0a` +
                       `Stay Stylish!%0a` +
                       `*Team LUMARO*%0a` +
                       `__________________________`;
 
-        // WhatsApp Link (91 prefix India ke liye)
-        let whatsappUrl = `https://b.whatsapp.com/91${mobile}?text=${message}`;
+        // Universal Link format jo Business aur Messenger dono ke liye option dega
+        let whatsappUrl = `https://api.whatsapp.com/send?phone=91${cleanMobile}&text=${message}`;
         
         // Naye tab mein WhatsApp khole
         window.open(whatsappUrl, '_blank');
     } else {
-        alert("Kripya sahi mobile number darj karein!");
+        alert("Kripya valid 10-digit mobile number enter karein!");
+        return; // Agar number galat hai toh aage na badhe
     }
 
     // 3. Bill Print karein
