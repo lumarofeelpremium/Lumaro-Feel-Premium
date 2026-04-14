@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clothing Billing</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 70%;
+            margin: 20px auto;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+            text-align: center;
+        }
+        input {
+            padding: 5px;
+            margin: 5px;
+        }
+        h2 {
+            text-align: center;
+        }
+        .top-section {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .controls {
+            text-align: center;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Clothing Billing System</h2>
+
+<div class="top-section">
+    Customer Name: <input type="text" id="name" placeholder="Enter Name">
+    Mobile No: <input type="text" id="mobile" placeholder="Enter Mobile" oninput="getPointsFromSheet()">
+</div>
+
+<table id="billTable">
+    <tr>
+        <th>Item</th>
+        <th>Brand</th>
+        <th>Quantity</th>
+        <th>Price</th>
+        <th>Total</th>
+    </tr>
+
+    <tr>
+        <td>Shirts / T-shirts</td>
+        <td><input type="text"></td>
+        <td><input type="number" oninput="calculate()"></td>
+        <td><input type="number" oninput="calculate()"></td>
+        <td>0</td>
+    </tr>
+
+    <tr>
+        <td>Trousers / Jeans</td>
+        <td><input type="text"></td>
+        <td><input type="number" oninput="calculate()"></td>
+        <td><input type="number" oninput="calculate()"></td>
+        <td>0</td>
+    </tr>
+
+    <tr>
+        <td>Jackets/Blazers</td>
+        <td><input type="text"></td>
+        <td><input type="number" oninput="calculate()"></td>
+        <td><input type="number" oninput="calculate()"></td>
+        <td>0</td>
+    </tr>
+
+    <tr>
+        <td>Undergarments/Socks</td>
+        <td><input type="text"></td>
+        <td><input type="number" oninput="calculate()"></td>
+        <td><input type="number" oninput="calculate()"></td>
+        <td>0</td>
+    </tr>
+
+    <tr>
+        <td>Shoes/Slipper</td>
+        <td><input type="text"></td>
+        <td><input type="number" oninput="calculate()"></td>
+        <td><input type="number" oninput="calculate()"></td>
+        <td>0</td>
+    </tr>
+
+    <tr>
+        <td>Accessories</td>
+        <td><input type="text"></td>
+        <td><input type="number" oninput="calculate()"></td>
+        <td><input type="number" oninput="calculate()"></td>
+        <td>0</td>
+    </tr>
+
+    <tr>
+        <th colspan="4">Grand Total</th>
+        <th id="grandTotal">0</th>
+    </tr>
+
+    <tr>
+        <th colspan="4">Discount</th>
+        <th id="discount">0</th>
+    </tr>
+
+    <tr>
+        <th colspan="4">Final Amount</th>
+        <th id="finalTotal">0</th>
+    </tr>
+
+    <tr>
+        <th colspan="4">Reward Points</th>
+        <th id="points">0</th>
+    </tr>
+</table>
+
+<div class="controls">
+    <button onclick="printBill()">Print Bill</button>
+    <button onclick="redeemPoints()">Redeem Points</button>
+    <button onclick="resetBill()">Reset</button>
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbzxQv9WgYd1EhgYK5UN1azesSnrLe0iZeVfEfogYbcUDeATWd0uH7o3cQ5efLzFGc7R/exec";
+
+let basePoints = 0;
+let currentPoints = 0;
+
+function calculate() {
+    let rows = document.getElementById("billTable").rows;
+    let grandTotal = 0;
+
+    for (let i = 1; i < rows.length; i++) {
+        if (rows[i].cells.length < 5) continue;
+
+        let qtyInput = rows[i].cells[2].querySelector("input");
+        let priceInput = rows[i].cells[3].querySelector("input");
+
+        if (!qtyInput || !priceInput) continue;
+
+        let qty = parseFloat(qtyInput.value) || 0;
+        let price = parseFloat(priceInput.value) || 0;
+
+        let total = qty * price;
+        rows[i].cells[4].innerText = total;
+
+        grandTotal += total;
+    }
+
+    document.getElementById("grandTotal").innerText = grandTotal;
+
+    currentPoints = Math.floor(grandTotal / 100) * 10;
+
+    document.getElementById("points").innerText = basePoints;
+
+    updateFinal();
+}
+
+function updateFinal() {
+    let total = parseFloat(document.getElementById("grandTotal").innerText) || 0;
+    let discount = parseFloat(document.getElementById("discount").innerText) || 0;
+
+    document.getElementById("finalTotal").innerText = total - discount;
+}
+
+function redeemPoints() {
+    let redeemable = basePoints;
+
+    if (redeemable < 10) {
+        alert("No usable points");
+        return;
+    }
+
+    let use = prompt("Kitne points use karna chahte ho?");
+    use = parseFloat(use);
+
+    if (!use || use <= 0 || use > redeemable) {
+        alert("Invalid points");
+        return;
+    }
+
+    let discount = Math.floor(use / 10) * 10;
+
+    basePoints = redeemable - discount;
+
+    document.getElementById("discount").innerText = discount;
+    document.getElementById("points").innerText = basePoints;
+
+    updateFinal();
+}
+
+function printBill() {
+    let finalPoints = basePoints + currentPoints;
+
+    let name = document.getElementById("name").value;
+    let mobile = document.getElementById("mobile").value.trim();
+    let total = document.getElementById("finalTotal").innerText;
+
+    fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({ name, mobile, total, points: finalPoints })
+    });
+
+    window.print();
+}
+
+function getPointsFromSheet() {
+    let mobile = document.getElementById("mobile").value.trim();
+
+    fetch(API_URL + "?mobile=" + mobile)
+    .then(res => res.text())
+    .then(data => {
+        basePoints = parseInt(data) || 0;
+        document.getElementById("points").innerText = basePoints;
+    });
+}
+
+function resetBill() {
+    document.getElementById("name").value = "";
+    document.getElementById("mobile").value = "";
+
+    let rows = document.getElementById("billTable").rows;
+
+    for (let i = 1; i < rows.length; i++) {
+        if (rows[i].cells.length < 5) continue;
+
+        let inputs = rows[i].querySelectorAll("input");
+        inputs.forEach(input => input.value = "");
+
+        rows[i].cells[4].innerText = "0";
+    }
+
+    document.getElementById("grandTotal").innerText = "0";
+    document.getElementById("discount").innerText = "0";
+    document.getElementById("finalTotal").innerText = "0";
+    document.getElementById("points").innerText = "0";
+
+    basePoints = 0;
+    currentPoints = 0;
+}
+</script>
+
+<style>
+@media print {
+    button { display: none; }
+}
+</style>
+
+</body>
+</html>
